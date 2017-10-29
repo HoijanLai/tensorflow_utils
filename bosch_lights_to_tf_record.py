@@ -6,6 +6,7 @@ import cv2
 from tqdm import tqdm
 
 flags = tf.app.flags
+flags.DEFINE_string('input_yaml', '', 'Path to input yaml')
 flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
 FLAGS = flags.FLAGS
 
@@ -15,7 +16,6 @@ def get_all(input_yaml):
 
     Note that RGB images are 1280x720
     :param input_yaml: Path to yaml file
-    :param riib: If True, change path to labeled pictures
     :return: images: Labels for traffic lights
     """
     images = yaml.load(open(input_yaml, 'rb').read())
@@ -28,16 +28,14 @@ def get_all(input_yaml):
 
 
 def create_tf_example(example):
-    # TODO(user): Populate the following variables from your example.
     height = 720 # Image height
     width = 1280 # Image width
-    filename = str.encode(example['path']) # Filename of the image. Empty if image is not from file
+    filename = str.encode(example['path']) 
     im = cv2.imread(example['path'])
-    encoded_image_data = im.tobytes() # Encoded image bytes
-    image_format = b'png' # b'jpeg' or b'png'
+    encoded_image_data = im.tobytes() 
+    image_format = b'png' 
     
     boxes = example['boxes']
-    
     
     xmins = [] 
     xmaxs = [] 
@@ -93,8 +91,7 @@ def create_tf_example(example):
 
 def main(_):
     writer = tf.python_io.TFRecordWriter(FLAGS.output_path)
-    path = './dataset_additional_rgb/additional_train.yaml'
-    examples = get_all(path)
+    examples = get_all(FLAGS.input_yaml)
 
     for example in tqdm(examples):
         tf_example = create_tf_example(example)
